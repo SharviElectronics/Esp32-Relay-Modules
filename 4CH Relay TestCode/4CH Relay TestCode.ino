@@ -3,6 +3,7 @@
 #define RELAY3  33
 #define RELAY4  32
 #define RelayArray[] = {26, 25, 33, 32}
+int i =0;
 void setup() {
   Serial.begin(115200);
 
