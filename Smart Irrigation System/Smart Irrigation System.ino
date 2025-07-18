@@ -1,14 +1,15 @@
 #include <WiFi.h>
 #include <WebServer.h>
 
-#define RELAY1 26
-#define RELAY2 25
-#define RELAY3 33
-#define RELAY4 32
+#include <esp_wifi.h>
+#define RELAY1  26
+#define RELAY2  25
+#define RELAY3  33
+#define RELAY4  32
 
 int RelayPins[] = {RELAY1, RELAY2, RELAY3, RELAY4};
 const char* RelayNames[] = {"Relay 1", "Relay 2", "Relay 3", "Relay 4"};
-
+// Replace with your WiFi credentials
 const char* ssid = "YOUR_SSID";
 const char* password = "YOUR_PASSWORD";
 
@@ -32,9 +33,8 @@ String getHtml() {
   html += "</style></head><body>";
 
   // Logo (replace with your real image URL if needed)
-  html += "<img src='https://via.placeholder.com/150x50?text=Sharvi+Electronics' class='logo'>";
+  html += "<img src='https://avatars.githubusercontent.com/u/76428759?text=Sharvi+Electronics' class='logo'>";
   html += "<h1>Sharvi ESP32 Relay Controller</h1>";
-  html += "<img src='https://avatars.githubusercontent.com/u/76428759?s=200&v=4/100?text=Relay' class='device-icon'>";
 
   for (int i = 0; i < 4; i++) {
     String state = digitalRead(RelayPins[i]) ? "ON" : "OFF";
@@ -65,7 +65,17 @@ void handleToggle() {
   }
   handleRoot();
 }
-
+void readMacAddress(){
+  uint8_t baseMac[6];
+  esp_err_t ret = esp_wifi_get_mac(WIFI_IF_STA, baseMac);
+  if (ret == ESP_OK) {
+    Serial.printf("%02X-%02X-%02X-%02X-%02X-%02X\n",
+                  baseMac[0], baseMac[1], baseMac[2],
+                  baseMac[3], baseMac[4], baseMac[5]);
+  } else {
+    Serial.println("Failed to read MAC address");
+  }
+}
 void setup() {
   Serial.begin(115200);
 
@@ -74,6 +84,9 @@ void setup() {
     digitalWrite(RelayPins[i], LOW);
   }
 
+  WiFi.mode(WIFI_STA);
+  WiFi.STA.begin();
+  readMacAddress();
   WiFi.begin(ssid, password);
   Serial.print("Connecting to WiFi");
   while (WiFi.status() != WL_CONNECTED) {
